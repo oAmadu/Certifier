@@ -7,6 +7,9 @@ from email.mime.base import MIMEBase
 from email import encoders
 import os
 
+import arabic_reshaper
+from bidi.algorithm import get_display
+
 # Load the Excel file
 df = pd.read_excel('sheet.xlsx') #the path to ur excel sheet file (or u can rename it to this)
 # also make sure that ur excel file have each row labeled with Name, Phone, Email, to avoid errors.
@@ -28,7 +31,7 @@ urEmail = 'email here' # The email you are using for sending
 urPass = 'password here' # The password of that email
 
 # Certificate generation function
-def generate_certificate(name, template_path=template_path, output_path='certificates/'):
+def generate_certificate(name, email, template_path=template_path, output_path='certificates/'):
     # Create output directory if it doesn't exist
     if not os.path.exists(output_path):
         os.makedirs(output_path)
@@ -71,6 +74,8 @@ def generate_certificate(name, template_path=template_path, output_path='certifi
     y = target_y - (textheight / 2)
 
     # Draw the name on the certificate
+    reshaped_text = arabic_reshaper.reshape(name)
+    bidi_text = get_display(reshaped_text)
     draw.text((x, y), name, font=font, fill="black")  
     
     # Save the certificate
@@ -118,7 +123,7 @@ for index, row in df.iterrows():
         continue
     
     try:
-        certificate_path = generate_certificate(name)
+        certificate_path = generate_certificate(name, email)
         send_email(email, subject, body, certificate_path) #(email, subject, body, path)
     except Exception as e:
         log_error(name, phone, str(e))
