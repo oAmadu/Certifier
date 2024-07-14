@@ -11,9 +11,19 @@ from bidi.algorithm import get_display
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
+# Function to select Excel file
+def select_excel():
+    filepath = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
+    if filepath:
+        excel_path.set(filepath)
 
+# Function to send a test email 
+def send_test_email():
+    messagebox.showinfo("Test Email", "Test email sent!")
 
-
+# Function to send bulk emails 
+def send_emails():
+    messagebox.showinfo("Bulk Emails", "Bulk emails sent!")
 
 # Load the Excel file
 df = pd.read_excel('sheet.xlsx') #the path to ur excel sheet file (or u can rename it to this)
@@ -141,11 +151,11 @@ root.title("Certifier - by oAmadu on github")
 excel_path = tk.StringVar()
 tk.Label(root, text="Select Excel File:").pack()
 tk.Entry(root, textvariable=excel_path).pack()
-tk.Button(root, text="Browse", command=select_excel_file).pack()
+tk.Button(root, text="Browse", command=select_excel).pack()
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
-tk.Button(root, text="Send Bulk Emails", command=send_bulk_emails).pack()
+tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
 
-root.mainloop()
+
 
 root.mainloop()
