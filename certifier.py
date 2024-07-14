@@ -6,9 +6,14 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 import os
-
 import arabic_reshaper
 from bidi.algorithm import get_display
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+
+
+
 
 # Load the Excel file
 df = pd.read_excel('sheet.xlsx') #the path to ur excel sheet file (or u can rename it to this)
@@ -127,3 +132,20 @@ for index, row in df.iterrows():
         send_email(email, subject, body, certificate_path) #(email, subject, body, path)
     except Exception as e:
         log_error(name, phone, str(e))
+
+
+
+root = tk.Tk()
+root.title("Certifier - by oAmadu on github")
+
+excel_path = tk.StringVar()
+tk.Label(root, text="Select Excel File:").pack()
+tk.Entry(root, textvariable=excel_path).pack()
+tk.Button(root, text="Browse", command=select_excel_file).pack()
+
+tk.Button(root, text="Send Test Email", command=send_test_email).pack()
+tk.Button(root, text="Send Bulk Emails", command=send_bulk_emails).pack()
+
+root.mainloop()
+
+root.mainloop()
