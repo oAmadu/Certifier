@@ -10,7 +10,7 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import tkinter as tk
 from tkinter import filedialog, messagebox
-
+#
 # Function to select Excel file
 def select_excel():
     filepath = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
