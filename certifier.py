@@ -153,10 +153,12 @@ tk.Label(root, text="Select Excel File:").pack()
 tk.Entry(root, textvariable=excel_path).pack()
 tk.Button(root, text="Browse", command=select_excel).pack()
 
-tk.label(root, text="Your Email")
+urEmail = tk.StringVar()
+tk.Label(root, text="Your Email")
 tk.Entry(root, textvariable=urEmail).pack
 
-tk.label(root, text="Your generated password")
+urPass = tk.StringVar()
+tk.Label(root, text="Your generated password")
 tk.Entry(root, textvariable=urPass).pack
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
