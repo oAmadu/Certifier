@@ -9,7 +9,7 @@ import os
 import arabic_reshaper
 from bidi.algorithm import get_display
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 #
 # Function to select Excel file
 def select_excel():
@@ -154,12 +154,28 @@ tk.Entry(root, textvariable=excel_path).pack()
 tk.Button(root, text="Browse", command=select_excel).pack()
 
 urEmail = tk.StringVar()
-tk.Label(root, text="Your Email")
-tk.Entry(root, textvariable=urEmail).pack
+tk.Label(root, text="Your Email").pack()
+tk.Entry(root, textvariable=urEmail).pack()
+
+def show_explanation():
+    explanation_window = tk.Toplevel(root)
+    explanation_window.title("How to get the generated password")
+    explanation_text = tk.Label(explanation_window, text="To generate an app-specific password:\n\n1. Go to your email account settings.\n2. Navigate to the security section.\n3. Generate an app-specific password.\n4. Copy and paste it here.  \n\n  For more details, visit:", padx=10, pady=10, wraplength=400)
+    explanation_text.pack(side=tk.TOP)
+    link = tk.Label(explanation_window, text="Google App Passwords", fg="blue", cursor="hand2")
+    link.pack()
+    link.bind("<Button-1>", lambda e: webbrowser.open_new("https://myaccount.google.com/apppasswords"))
+
 
 urPass = tk.StringVar()
-tk.Label(root, text="Your generated password")
-tk.Entry(root, textvariable=urPass).pack
+frame = tk.Frame(root).pack()
+tk.Label(frame, text="Your generated password").pack()
+tk.Entry(frame, textvariable=urPass).pack()
+
+# Add "How do I get that?" text with a click event
+howtoget = tk.Label(frame, text="(How do I get that?)", fg="blue", cursor="hand2")
+howtoget.pack(side=tk.RIGHT)
+howtoget.bind("<Button-1>", lambda e: show_explanation())
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
 tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
