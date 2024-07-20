@@ -155,8 +155,10 @@ tk.Entry(root, textvariable=excel_path).pack()
 tk.Button(root, text="Browse", command=select_excel).pack()
 
 urEmail = tk.StringVar()
-tk.Label(root, text="Your Email").pack()
-tk.Entry(root, textvariable=urEmail).pack()
+emailFrame = tk.Frame(root) 
+emailFrame.pack()
+tk.Label(emailFrame, text="Your Email").pack(side=tk.LEFT)
+tk.Entry(emailFrame, textvariable=urEmail).pack(side=tk.BOTTOM)
 
 def show_explanation():
     explanation_window = tk.Toplevel(root)
@@ -167,16 +169,24 @@ def show_explanation():
     link.pack()
     link.bind("<Button-1>", lambda e: webbrowser.open_new("https://myaccount.google.com/apppasswords"))
 
-
+#Password Entry section
 urPass = tk.StringVar()
-frame = tk.Frame(root).pack()
-tk.Label(frame, text="Your generated password").pack()
-tk.Entry(frame, textvariable=urPass).pack()
+frame = tk.Frame(root)
+frame.pack()
 
-# Add "How do I get that?" text with a click event
+tk.Label(frame, text="Your generated password").pack(side=tk.LEFT)
+
+# Add "How do I get that?" clickable text
 howtoget = tk.Label(frame, text="(How do I get that?)", fg="blue", cursor="hand2")
 howtoget.pack(side=tk.RIGHT)
 howtoget.bind("<Button-1>", lambda e: show_explanation())
+
+passEntryFrame = tk.Frame(frame)
+passEntryFrame.pack()
+
+tk.Entry(passEntryFrame, textvariable=urPass).pack(side=tk.LEFT)
+
+
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
 tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
