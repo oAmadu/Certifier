@@ -10,6 +10,7 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+import webbrowser
 #
 # Function to select Excel file
 def select_excel():
