@@ -18,13 +18,7 @@ def select_excel():
     if filepath:
         excel_path.set(filepath)
 
-# Function to send a test email 
-def send_test_email():
-    messagebox.showinfo("Test Email", "Test email sent!")
 
-# Function to send bulk emails 
-def send_emails():
-    messagebox.showinfo("Bulk Emails", "Bulk emails sent!")
 
 # Load the Excel file
 df = pd.read_excel('sheet.xlsx') #the path to ur excel sheet file (or u can rename it to this)
@@ -127,22 +121,7 @@ def log_error(name, phone, reason):
     with open('error_log.txt', 'a') as log_file:
         log_file.write(f"Name: {name}, Phone: {phone}, Reason: {reason}\n")
 
-# Main loop to generate certificates and send emails
-for index, row in df.iterrows():
-    name = row['Name']
-    email = row['Email']
-    phone = row['Phone']
-    
-    # Skip if no valid email
-    if not isinstance(email, str) or email.lower() in ["no email", ""]:
-        log_error(name, phone, "Invalid email")
-        continue
-    
-    try:
-        certificate_path = generate_certificate(name, email)
-        send_email(email, subject, body, certificate_path) #(email, subject, body, path)
-    except Exception as e:
-        log_error(name, phone, str(e))
+
 
 
 
@@ -186,7 +165,38 @@ passEntryFrame.pack()
 
 tk.Entry(passEntryFrame, textvariable=urPass).pack(side=tk.LEFT)
 
+# Function to send a test email 
+def send_test_email():
+        name = 'Test Name'
+        email = urEmail.get()
+        from_email = urEmail.get()
+        password = urPass.get()
 
+        certificate_path = generate_certificate(name, email)
+        send_email(email, subject, body, certificate_path, from_email, password) #(email, subject, body, path)
+
+        messagebox.showinfo("Test Email", "Test email sent!")
+
+# Function to send bulk emails 
+def send_emails():
+# Main loop to generate certificates and send emails
+    for index, row in df.iterrows():
+        name = row['Name']
+        email = row['Email']
+        phone = row['Phone']
+        
+        # Skip if no valid email
+        if not isinstance(email, str) or email.lower() in ["no email", ""]:
+            log_error(name, phone, "Invalid email")
+            continue
+        
+        try:
+            certificate_path = generate_certificate(name, email)
+            send_email(email, subject, body, certificate_path) #(email, subject, body, path)
+        except Exception as e:
+            log_error(name, phone, str(e))
+
+    messagebox.showinfo("Bulk Emails", "Bulk emails sent!")
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
 tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
