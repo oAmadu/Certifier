@@ -18,6 +18,11 @@ def select_excel():
     if filepath:
         excel_path.set(filepath)
 
+def select_template():
+    filepath = filedialog.askopenfilename(filetypes=[("Image files", "*.jpeg;*.png;*.jpg")])
+    if filepath:
+        cert_path.set(filepath)
+
 
 
 # Load the Excel file
@@ -132,6 +137,11 @@ excel_path = tk.StringVar()
 tk.Label(root, text="Select Excel File:").pack()
 tk.Entry(root, textvariable=excel_path).pack()
 tk.Button(root, text="Browse", command=select_excel).pack()
+
+cert_path = tk.StringVar()
+tk.Label(root, text="Select Certificate File:").pack()
+tk.Entry(root, textvariable=cert_path).pack()
+tk.Button(root, text="Browse", command=select_template).pack()
 
 urEmail = tk.StringVar()
 emailFrame = tk.Frame(root) 
