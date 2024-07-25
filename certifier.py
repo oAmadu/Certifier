@@ -121,8 +121,8 @@ cordsY = 342 # the Y of the place where the name should be printed
 # You can use gimp (or Paint if u r on windows) to find those coordinates
 # The text is centered, so the point should be centered on the space u desire to have the names on
 
-certFont = 'DejaVuSans-Bold.ttf' # Here specify the font path
-fontSize = 24
+certFont = current_font_family # Here specify the font path
+fontSize = current_font_size
 subject = "Your certificate" # The subject of the email
 body = """ 
 Congrats
@@ -131,25 +131,34 @@ urEmail = 'email here' # The email you are using for sending
 urPass = 'password here' # The password of that email
 
 # Certificate generation function
-def generate_certificate(name, email, font_family='Helvetica', font_size=20):
+def generate_certificate(name, email, font_family=current_font_family, font_size=current_font_size):
     # Open the template
     img = Image.open(cert_path.get()).convert("RGB")
     draw = ImageDraw.Draw(img)
 
     # Set the font
-    font = ImageFont.truetype(f"{font_family}.ttf", font_size)
+    try:
+        font_path = f"{font_family}.ttf"
+        font = ImageFont.truetype(font_path, font_size)
+    except OSError:
+        font = ImageFont.load_default()
 
-    # Calculate text position
-    text_width, text_height = draw.textsize(name, font=font)
+    # Calculate text position using textbbox
+    bbox = draw.textbbox((0, 0), name, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
     position = (cordsX - text_width // 2, cordsY - text_height // 2)
 
     # Add text to image
     draw.text(position, name, fill="black", font=font)
 
     # Save the certificate
-    certificate_path = f"certificate_{email}.jpeg"
+    certificate_path = f"{email}.jpeg"
     img.save(certificate_path)
     return certificate_path
+
+
+
 
 # Email sending function
 def send_email(to_email, subject, body, attachment_path, from_email=urEmail, password=urPass): 
@@ -233,36 +242,39 @@ tk.Entry(passEntryFrame, textvariable=urPass).pack(side=tk.LEFT)
 
 # Function to send a test email 
 def send_test_email():
-        name = 'Test Name'
-        email = urEmail.get()
-        from_email = urEmail.get()
-        password = urPass.get()
+    name = 'Test Name'
+    email = urEmail.get()
+    phone = 'Test Number'
+    from_email = urEmail.get()
+    password = urPass.get()
 
-        certificate_path = generate_certificate(name, email)
-        send_email(email, subject, body, certificate_path, from_email, password) #(email, subject, body, path)
+    certificate_path = generate_certificate(name, email, current_font_family, current_font_size)
+    send_email(email, subject, body, certificate_path) #(email, subject, body, path)
 
-        messagebox.showinfo("Test Email", "Test email sent! \n Check your inbox.")
+    messagebox.showinfo("Test Email", "Test email sent!")
 
 # Function to send bulk emails 
 def send_emails():
-# Main loop to generate certificates and send emails
+    from_email = urEmail.get()
+    password = urPass.get()
+
     for index, row in df.iterrows():
         name = row['Name']
         email = row['Email']
         phone = row['Phone']
         
-        # Skip if no valid email
         if not isinstance(email, str) or email.lower() in ["no email", ""]:
             log_error(name, phone, "Invalid email")
             continue
         
         try:
-            certificate_path = generate_certificate(name, email)
+            certificate_path = generate_certificate(name, email, current_font_family, current_font_size)
             send_email(email, subject, body, certificate_path) #(email, subject, body, path)
         except Exception as e:
             log_error(name, phone, str(e))
 
     messagebox.showinfo("Bulk Emails", "Bulk emails sent!")
+
 
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
 tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
