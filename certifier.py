@@ -155,6 +155,10 @@ def generate_certificate(name, email, font_family=current_font_family, font_size
 
     # Save the certificate
     output_path='certificates/'
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    
     certificate_path = output_path + email + '.png'
     img.save(certificate_path)
     return certificate_path
