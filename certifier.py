@@ -130,7 +130,7 @@ urEmail = 'email here' # The email you are using for sending
 urPass = 'password here' # The password of that email
 
 # Certificate generation function
-def generate_certificate(name, email, font_family=current_font_family, font_size=current_font_size):
+def generate_certificate(name, email, font_family=current_font_family, font_size=current_font_size, ):
     font_family = current_font_family # Here specify the font path
     font_size = current_font_size
     # Open the template
@@ -154,7 +154,8 @@ def generate_certificate(name, email, font_family=current_font_family, font_size
     draw.text(position, name, fill="black", font=font)
 
     # Save the certificate
-    certificate_path = f"{email}.jpeg"
+    output_path='certificates/'
+    certificate_path = output_path + email + '.png'
     img.save(certificate_path)
     return certificate_path
 
