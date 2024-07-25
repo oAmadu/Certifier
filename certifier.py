@@ -121,8 +121,7 @@ cordsY = 342 # the Y of the place where the name should be printed
 # You can use gimp (or Paint if u r on windows) to find those coordinates
 # The text is centered, so the point should be centered on the space u desire to have the names on
 
-certFont = current_font_family # Here specify the font path
-fontSize = current_font_size
+
 subject = "Your certificate" # The subject of the email
 body = """ 
 Congrats
@@ -132,6 +131,8 @@ urPass = 'password here' # The password of that email
 
 # Certificate generation function
 def generate_certificate(name, email, font_family=current_font_family, font_size=current_font_size):
+    font_family = current_font_family # Here specify the font path
+    font_size = current_font_size
     # Open the template
     img = Image.open(cert_path.get()).convert("RGB")
     draw = ImageDraw.Draw(img)
@@ -162,6 +163,8 @@ def generate_certificate(name, email, font_family=current_font_family, font_size
 
 # Email sending function
 def send_email(to_email, subject, body, attachment_path, from_email=urEmail, password=urPass): 
+    from_email = urEmail.get()
+    password = urPass.get()
     msg = MIMEMultipart()
     msg['From'] = from_email
     msg['To'] = to_email
@@ -245,18 +248,14 @@ def send_test_email():
     name = 'Test Name'
     email = urEmail.get()
     phone = 'Test Number'
-    from_email = urEmail.get()
-    password = urPass.get()
 
     certificate_path = generate_certificate(name, email, current_font_family, current_font_size)
-    send_email(email, subject, body, certificate_path) #(email, subject, body, path)
+    send_email(email, subject.get(), body.get(), certificate_path) #(email, subject, body, path)
 
     messagebox.showinfo("Test Email", "Test email sent!")
 
 # Function to send bulk emails 
 def send_emails():
-    from_email = urEmail.get()
-    password = urPass.get()
 
     for index, row in df.iterrows():
         name = row['Name']
@@ -269,16 +268,24 @@ def send_emails():
         
         try:
             certificate_path = generate_certificate(name, email, current_font_family, current_font_size)
-            send_email(email, subject, body, certificate_path) #(email, subject, body, path)
+            send_email(email, subject.get(), body.get(), certificate_path) #(email, subject, body, path)
         except Exception as e:
             log_error(name, phone, str(e))
 
     messagebox.showinfo("Bulk Emails", "Bulk emails sent!")
 
-
+# Sending emails
 tk.Button(root, text="Send Test Email", command=send_test_email).pack()
 tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
 
+# Email context (Subject and body)
+subject = tk.StringVar()
+body = tk.StringVar()
+tk.Label(root, text="Email Subject").pack()
+tk.Entry(root, textvariable=subject).pack()
+
+tk.Label(root, text="Email Body").pack()
+tk.Entry(root, textvariable=body).pack()
 
 
 root.mainloop()
