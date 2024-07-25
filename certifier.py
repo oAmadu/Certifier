@@ -20,6 +20,8 @@ def select_excel():
     if filepath:
         excel_path.set(filepath)
 
+
+
 # Define the global variables for font settings
 fontSize = 54
 current_font_family = 'Helvetica'
@@ -111,7 +113,7 @@ def coordinator():
 
 
 # Load the Excel file
-df = pd.read_excel('sheet.xlsx') #the path to ur excel sheet file (or u can rename it to this)
+#the path to ur excel sheet file (or u can rename it to this)
 # also make sure that ur excel file have each row labeled with Name, Phone, Email, to avoid errors.
 # The code will automatically look for these names to access the data correctly
 
@@ -167,7 +169,7 @@ def generate_certificate(name, email, font_family=current_font_family, font_size
 
 
 # Email sending function
-def send_email(to_email, subject, body, attachment_path, from_email=urEmail, password=urPass): 
+def send_email(to_email, subject, body, certificate_path, from_email=urEmail, password=urPass): 
     from_email = urEmail.get()
     password = urPass.get()
     msg = MIMEMultipart()
@@ -176,11 +178,11 @@ def send_email(to_email, subject, body, attachment_path, from_email=urEmail, pas
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
     
-    attachment = open(attachment_path, 'rb')
+    attachment = open(certificate_path, 'rb')
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((attachment).read())
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', "attachment; filename= %s" % attachment_path)
+    part.add_header('Content-Disposition', "attachment; filename= %s" % certificate_path)
     msg.attach(part)
     
     server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -261,11 +263,24 @@ def send_test_email():
 
 # Function to send bulk emails 
 def send_emails():
+    filepath = excel_path.get()
+    if not filepath:
+        messagebox.showerror("Error", "Please select an Excel file.")
+        return
 
-    for index, row in df.iterrows():
-        name = row['Name']
-        email = row['Email']
-        phone = row['Phone']
+    try:
+        df = pd.read_excel(filepath)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to read Excel file: {e}")
+        return
+    for _, row in df.iterrows():
+        try:
+            name = row['Name']
+            email = row['Email']
+            phone = row['Phone']
+        except KeyError as e:
+            messagebox.showerror("Error", f"Missing column in Excel file: \nAlso make sure the excel sheet is in the same directory.{e}")
+            return
         
         if not isinstance(email, str) or email.lower() in ["no email", ""]:
             log_error(name, phone, "Invalid email")
@@ -287,10 +302,12 @@ tk.Button(root, text="Send Bulk Emails", command=send_emails).pack()
 subject = tk.StringVar()
 body = tk.StringVar()
 tk.Label(root, text="Email Subject").pack()
-tk.Entry(root, textvariable=subject).pack()
+subject_entry = tk.Text(root, height=1, width=50)
+subject_entry.pack()
 
 tk.Label(root, text="Email Body").pack()
-tk.Entry(root, textvariable=body).pack()
+body_entry = tk.Text(root, height=10, width=50)
+body_entry.pack()
 
 
 root.mainloop()
