@@ -36,9 +36,17 @@ pip install pandas pillow openpyxl arabic-reshaper python-bidi tkinter
 git clone https://github.com/oAmadu/Certifier.git
 cd Certifier
 ```
-3. **Install the required libraries:** `pip install pandas pillow openpyxl arabic-reshaper python-bidi tkinter`
 
-3. **Run the script:** `python certifier.py`
+3. **Install the required libraries:** 
+```bash
+pip install pandas pillow openpyxl arabic-reshaper python-bidi tkinter
+cd Certifier
+```
+
+3. **Run the script:**
+```bash
+python certifier.py
+```
 
 ## Basic Tutorial
 
