@@ -10,18 +10,103 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+from tkinter import font as tkFont
 import webbrowser
-#
+from PIL import Image, ImageDraw, ImageFont, ImageTk
+
 # Function to select Excel file
 def select_excel():
     filepath = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
     if filepath:
         excel_path.set(filepath)
 
+# Define the global variables for font settings
+fontSize = 54
+current_font_family = 'Helvetica'
+current_font_size = fontSize
+
+# Function to select certificate template
 def select_template():
     filepath = filedialog.askopenfilename(filetypes=[("Image files", "*.jpeg;*.png;*.jpg")])
     if filepath:
         cert_path.set(filepath)
+        coord_button.config(state=tk.NORMAL)
+
+# Function to open the window for coordinating text place on the certificate
+def coordinator():
+    global current_font_family, current_font_size
+    
+    coord_window = tk.Toplevel(root)
+    coord_window.title("Select Coordinates")
+    
+    # Load and display the template image
+    template_img = Image.open(cert_path.get())
+    template_photo = ImageTk.PhotoImage(template_img)
+    canvas = tk.Canvas(coord_window, width=template_img.width, height=template_img.height)
+    canvas.pack()
+    canvas.create_image(0, 0, anchor=tk.NW, image=template_photo)
+    
+    # Label to show the coordinates
+    coord_label = tk.Label(coord_window, text=f"Coordinates: ({cordsX}, {cordsY})")
+    coord_label.pack()
+    
+    # Add test text to the canvas
+    text_id = canvas.create_text(cordsX, cordsY, text="Ahmad Almathami", fill="black", anchor=tk.CENTER, font=(current_font_family, current_font_size))
+
+    def on_drag(event):
+        global cordsX, cordsY
+        cordsX = event.x
+        cordsY = event.y
+        coord_label.config(text=f"Coordinates: ({cordsX}, {cordsY})")
+        canvas.coords(text_id, cordsX, cordsY)
+    
+    # Bind the drag function to the canvas
+    canvas.tag_bind(text_id, "<B1-Motion>", on_drag)
+
+    # Functions to increase or decrease the text size
+    def increase_size():
+        global current_font_size
+        current_font_size += 2
+        canvas.itemconfig(text_id, font=(current_font_family, current_font_size))
+    
+    def decrease_size():
+        global current_font_size
+        current_font_size -= 2
+        canvas.itemconfig(text_id, font=(current_font_family, current_font_size))
+
+    # Function to browse for fonts
+    def browse_font():
+        font_choice = tkFont.families()
+        font_choice_window = tk.Toplevel(coord_window)
+        font_choice_window.title("Choose Font")
+        
+        listbox = tk.Listbox(font_choice_window)
+        listbox.pack(fill=tk.BOTH, expand=True)
+
+        for f in font_choice:
+            listbox.insert(tk.END, f)
+        
+        def select_font(event):
+            global current_font_family
+            selected_font = listbox.get(listbox.curselection())
+            current_font_family = selected_font
+            canvas.itemconfig(text_id, font=(current_font_family, current_font_size))
+            font_choice_window.destroy()
+        
+        listbox.bind("<<ListboxSelect>>", select_font)
+
+    # Add buttons for increasing and decreasing text size
+    btn_increase = tk.Button(coord_window, text="Increase Text Size", command=increase_size)
+    btn_increase.pack(side=tk.LEFT)
+    btn_decrease = tk.Button(coord_window, text="Decrease Text Size", command=decrease_size)
+    btn_decrease.pack(side=tk.LEFT)
+    
+    # Add button for browsing fonts
+    btn_browse_font = tk.Button(coord_window, text="Browse Fonts", command=browse_font)
+    btn_browse_font.pack(side=tk.LEFT)
+    
+    coord_window.mainloop()
+
 
 
 
@@ -46,58 +131,25 @@ urEmail = 'email here' # The email you are using for sending
 urPass = 'password here' # The password of that email
 
 # Certificate generation function
-def generate_certificate(name, email, template_path=template_path, output_path='certificates/'):
-    # Create output directory if it doesn't exist
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    # Load the certificate template
-    image = Image.open(template_path)
-    draw = ImageDraw.Draw(image)
-    
-    # Define the font and size 
-    font_path = certFont
-    font_size = fontSize
-    try:
-        font = ImageFont.truetype(font_path, font_size)
-    except IOError:
-        raise Exception(f"Font file not found: {font_path}")
-    font = ImageFont.truetype(font_path, font_size)
-    
-    # Target coordinates (center of the text)
-    target_x = cordsX
-    target_y = cordsY
+def generate_certificate(name, email, font_family='Helvetica', font_size=20):
+    # Open the template
+    img = Image.open(cert_path.get()).convert("RGB")
+    draw = ImageDraw.Draw(img)
 
-    # Ensure the text fits within the designated area
-    max_width = 1000  # Maximum width for the text
-    
-    # Resize the font if necessary to fit within the max_width
-    bbox = draw.textbbox((0, 0), name, font=font)
-    textwidth = bbox[2] - bbox[0]
-    textheight = bbox[3] - bbox[1]
-    while textwidth > max_width:
-        font_size -= 1
-        font = ImageFont.truetype(font_path, font_size)
-        bbox = draw.textbbox((0, 0), name, font=font)
-        textwidth = bbox[2] - bbox[0]
-        textheight = bbox[3] - bbox[1]
+    # Set the font
+    font = ImageFont.truetype(f"{font_family}.ttf", font_size)
 
+    # Calculate text position
+    text_width, text_height = draw.textsize(name, font=font)
+    position = (cordsX - text_width // 2, cordsY - text_height // 2)
 
+    # Add text to image
+    draw.text(position, name, fill="black", font=font)
 
-    # Calculate the position to center the text at the target coordinates
-    x = target_x - (textwidth / 2)
-    y = target_y - (textheight / 2)
-
-    # Draw the name on the certificate
-    reshaped_text = arabic_reshaper.reshape(name)
-    bidi_text = get_display(reshaped_text)
-    draw.text((x, y), name, font=font, fill="black")  
-    
     # Save the certificate
-    output_file = output_path + name.replace(" ", "_") + '.png'
-    image.save(output_file)
-    
-    return output_file
+    certificate_path = f"certificate_{email}.jpeg"
+    img.save(certificate_path)
+    return certificate_path
 
 # Email sending function
 def send_email(to_email, subject, body, attachment_path, from_email=urEmail, password=urPass): 
@@ -143,6 +195,10 @@ tk.Label(root, text="Select Certificate File:").pack()
 tk.Entry(root, textvariable=cert_path).pack()
 tk.Button(root, text="Browse", command=select_template).pack()
 
+coord_button = tk.Button(root, text="Select Coordinates", command=coordinator, state=tk.DISABLED)
+coord_button.pack()
+
+
 urEmail = tk.StringVar()
 emailFrame = tk.Frame(root) 
 emailFrame.pack()
@@ -185,7 +241,7 @@ def send_test_email():
         certificate_path = generate_certificate(name, email)
         send_email(email, subject, body, certificate_path, from_email, password) #(email, subject, body, path)
 
-        messagebox.showinfo("Test Email", "Test email sent!")
+        messagebox.showinfo("Test Email", "Test email sent! \n Check your inbox.")
 
 # Function to send bulk emails 
 def send_emails():
